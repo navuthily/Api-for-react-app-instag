@@ -41,13 +41,17 @@ const getCreate = function (req, res) {
 const postCreate = async function (req, res) {
   console.log(req.file)
   const file= req.file.path;
+  console.log(req.body)
+  var user = req.body.user;
+  var user2 = JSON.parse(user)
+
   const path = await cloudinary.uploader
     .upload(file)
     .then(result => result.url)
     .catch(error => console.log("erro:::>", error));
   Post.create({
-    id: 'cfvgbhjn',
-    authorid:  "leSPD0q8u",
+    id: user._id,
+    authorid:user2.id,
     contentPost:req.body.contentPost,
     imagePost: path
   });
@@ -73,30 +77,29 @@ const viewDetailPost = function (req, res) {
 };
 const postComment = async function (req, res) {
   let contentComment= req.body.contentComment;
-  console.log(contentComment+"<<= content comment")
-  let commentByUserId = req.signedCookies.userId;
-  let postId = req.params.postId;
-  if (!postId) {
-    res.redirect("/post");
-  }
-  let post = await Post.findOne({
-    id: postId
+  var user = req.body.user;
+  var user2 = JSON.parse(user)
+  let commentByUserId =user2.id;
+  let postId = '5f0f01a7e5b652634c89de6d';
+  await Post.findOne({
+    _id: postId
   });
     await Post.findOneAndUpdate({
-      id: postId
+      _id: postId
     }, {
       $push: {
         comments: {
-          commentByUserId,
-          contentComment: req.body.contentComment
+          commentByUserId:commentByUserId,
+          contentComment: contentComment
         }
       }
     });
-    return res.redirect("/post");
+    return res.json({oke:'oke luôn'});
 }
 const getComment =function (req,res){
   return res.redirect("/post");
 }
+
 var getApi = async (req, res) => {
   let users = await User.find();
   let posts = await Post.find();
@@ -132,13 +135,41 @@ var getApi = async (req, res) => {
   }).then(function (user) {
     Post.find().then(function (posts) {
       User.find().then(function (users) {
-         res.json({
+         res.json(
         changePost
-        })
+        )
       })
     })
   })
 };
+
+//
+const getheart =function (req,res){
+  return res.redirect("/post");
+}
+
+const addToCartHeart = async (req, res) => {
+  var user = req.body.user;
+  var user2 = JSON.parse(user)
+  let heartByUserId =user2.id;
+  let postId = '5f0f01a7e5b652634c89de6d'
+  let post = await Post.findOne({_id:postId});
+  let usera = post.hearts.find(
+    cartItem => cartItem.heartByUserId === heartByUserId
+  );
+  console.log(usera)
+  if (usera) {
+    usera.quantity += 1;
+    console.log(usera.quantity)
+    post.save();
+  } else {
+    await Post.findOneAndUpdate({_id:postId}, {
+      $push: { hearts: { heartByUserId, quantity: 1 } }
+    });
+  }
+  res.json({oke:'oke luôn'});
+};
+
 module.exports = {
   getPost,
   getCreate,
@@ -146,5 +177,6 @@ module.exports = {
   getComment,
   postComment,
   getApiPost,
-  getApi
+  getApi,
+  addToCartHeart, getheart
 }

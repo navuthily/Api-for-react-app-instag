@@ -8,7 +8,9 @@ const{
   getComment,
   postComment,
   getApiPost,
-  getApi
+  getApi,
+  addToCartHeart,
+  getheart
 }=require('../controllers/post.controller')
 const {
   uploadMulter,
@@ -20,6 +22,8 @@ router.get("/api",getApiPost);
 router.get('/ap',getApi)
 router.get("/create",getCreate);
 router.post("/create",uploadMulter.single('imagePost'), postCreate);
-router.get('/comment/:postId', userAuth, getComment)
-router.post('/comment/:postId', userAuth,postComment)
+router.get('/comment/',  getComment)
+router.post('/comment/',postComment)
+router.get('/heart/', getheart )
+router.post('/heart/',addToCartHeart)
 module.exports = router;

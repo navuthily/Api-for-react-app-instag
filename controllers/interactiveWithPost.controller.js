@@ -1,27 +1,22 @@
 const Post= require("../models/post.model.js");
 module.exports.addToCartHeart = async (req, res) => {
-  let heartByUserId = req.signedCookies.userId;
-  let postId = req.params.postId;
- console.log(postId+'postid');
-  if (!postId) {
-    res.redirect("/post");
-  }
-  let post = await Post.findOne({id:postId});
-  let user = post.hearts.find(
+  var user = req.body.user;
+  var user2 = JSON.parse(user)
+  let heartByUserId =user2.id;
+  let postId = '5f0f01a7e5b652634c89de6d'
+  let post = await Post.findOne({_id:postId});
+  let usera = post.hearts.find(
     cartItem => cartItem.heartByUserId === heartByUserId
   );
-  if (user) {
-    user.quantity += 1;
-    console.log(user.quantity)
+  console.log(usera)
+  if (usera) {
+    usera.quantity += 1;
+    console.log(usera.quantity)
     post.save();
   } else {
-    await Post.findOneAndUpdate({id:postId}, {
+    await Post.findOneAndUpdate({_id:postId}, {
       $push: { hearts: { heartByUserId, quantity: 1 } }
     });
   }
-  res.redirect("/post");
-};
-
-module.exports.addToCartComment = async (req, res) => {
-
+  res.json({oke:'oke luôn'});
 };
