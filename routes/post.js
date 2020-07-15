@@ -18,8 +18,8 @@ const {isAdmin,isNotAdmin}=require('../middleware/isAdmin.middleware')
 router.get("/",getPost);
 router.get("/api",getApiPost);
 router.get('/ap',getApi)
-router.get("/create", userAuth,isAdmin,getCreate);
-router.post("/create",userAuth,isAdmin,uploadMulter.single('imagePost'), postCreate);
+router.get("/create",getCreate);
+router.post("/create",uploadMulter.single('imagePost'), postCreate);
 router.get('/comment/:postId', userAuth, getComment)
 router.post('/comment/:postId', userAuth,postComment)
 module.exports = router;

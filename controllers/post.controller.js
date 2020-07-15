@@ -14,15 +14,10 @@ const getPost = async function (req, res) {
     id: req.signedCookies.userId
   }).then(function (user) {
     Post.find().then(async function (posts) {
-
-    // console.log(a); 
-    //   console.log(counts+"counts");
       res.render("posts/index", {
         posts,
         user
       });
-  //    res.json({posts, user })
-
     })
   })
 }
@@ -31,12 +26,7 @@ const getApiPost = async function (req, res) {
     id: req.signedCookies.userId
   }).then(function (user) {
     Post.find().then(async function (posts) {
-
-    // console.log(a); 
-    //   console.log(counts+"counts");
- 
       res.json(posts)
-
     })
   })
 }
@@ -49,23 +39,23 @@ const getCreate = function (req, res) {
   });
 };
 const postCreate = async function (req, res) {
-  req.body.id = shortid.generate();
-  const file = req.file.path;
-  console.log(file);
+  console.log(req.file)
+  const file= req.file.path;
   const path = await cloudinary.uploader
     .upload(file)
     .then(result => result.url)
     .catch(error => console.log("erro:::>", error));
   Post.create({
-    id: 'cfvgbhjn',//req.body.id,
-    authorid:  "leSPD0q8u",//req.signedCookies.userId,
-    contentPost: req.body.contentPost,
-    imagePost: 'dfghj'//path,
+    id: 'cfvgbhjn',
+    authorid:  "leSPD0q8u",
+    contentPost:req.body.contentPost,
+    imagePost: path
   });
   if (req.file) {
     fs.unlinkSync(req.file.path);
   }
-  return res.redirect("/post");
+//  return res.redirect("/post");
+return res.json({a:req.body,b:req.file})
 };
 const viewDetailPost = function (req, res) {
   User.findOne({
@@ -120,11 +110,6 @@ var getApi = async (req, res) => {
      quantity:heart.quantity
       }
     });
-
-
-
-
-
     var comments = post.comments;
     var d = comments.map(comment =>{
       let uus=users.find(uus =>uus.id === comment.commentByUserId)
@@ -133,9 +118,7 @@ var getApi = async (req, res) => {
         contentComment:comment.contentComment
       }
     })
-
     return {
-    
       id: post.id,
       userName: user.username,
       contentPost: post.contentPost,
@@ -149,15 +132,12 @@ var getApi = async (req, res) => {
   }).then(function (user) {
     Post.find().then(function (posts) {
       User.find().then(function (users) {
-//console.log(changePost);
          res.json({
-        changePost//t muốn cái khác cơ
+        changePost
         })
       })
     })
-
   })
-
 };
 module.exports = {
   getPost,
