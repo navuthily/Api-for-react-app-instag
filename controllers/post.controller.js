@@ -50,7 +50,7 @@ const postCreate = async function (req, res) {
     .then(result => result.url)
     .catch(error => console.log("erro:::>", error));
   Post.create({
-    id: user._id,
+    id:shortid.generate(),
     authorid:user2.id,
     contentPost:req.body.contentPost,
     imagePost: path
@@ -58,7 +58,7 @@ const postCreate = async function (req, res) {
   if (req.file) {
     fs.unlinkSync(req.file.path);
   }
-//  return res.redirect("/post");
+
 return res.json({a:req.body,b:req.file})
 };
 const viewDetailPost = function (req, res) {
@@ -80,10 +80,9 @@ const postComment = async function (req, res) {
   var user = req.body.user;
   var user2 = JSON.parse(user)
   let commentByUserId =user2.id;
-  let postId = '5f0f01a7e5b652634c89de6d';
-  await Post.findOne({
-    _id: postId
-  });
+  let postId = req.body.id;
+  console.log('postId')
+  console.log(postId)
     await Post.findOneAndUpdate({
       _id: postId
     }, {
@@ -103,6 +102,7 @@ const getComment =function (req,res){
 var getApi = async (req, res) => {
   let users = await User.find();
   let posts = await Post.find();
+
   let changePost = posts.map(post => {
     let user = users.find(user => user.id === post.authorid);
     var hearts= post.hearts;
@@ -122,7 +122,7 @@ var getApi = async (req, res) => {
       }
     })
     return {
-      id: post.id,
+      id: post._id,
       userName: user.username,
       contentPost: post.contentPost,
       imagePost: post.imagePost,
@@ -130,20 +130,11 @@ var getApi = async (req, res) => {
       comments:d
     };
   });
-  User.findOne({
-    id: req.signedCookies.userId
-  }).then(function (user) {
-    Post.find().then(function (posts) {
-      User.find().then(function (users) {
-         res.json(
-        changePost
-        )
-      })
-    })
-  })
+  res.json(
+    changePost
+    )
 };
 
-//
 const getheart =function (req,res){
   return res.redirect("/post");
 }
@@ -151,8 +142,9 @@ const getheart =function (req,res){
 const addToCartHeart = async (req, res) => {
   var user = req.body.user;
   var user2 = JSON.parse(user)
+
   let heartByUserId =user2.id;
-  let postId = '5f0f01a7e5b652634c89de6d'
+  let postId = req.body.id;
   let post = await Post.findOne({_id:postId});
   let usera = post.hearts.find(
     cartItem => cartItem.heartByUserId === heartByUserId
