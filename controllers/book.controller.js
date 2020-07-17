@@ -27,50 +27,7 @@ const getBook = function (req, res) {
     })
   })
 }
-var create = async function (req, res) {
-  var book = await Book.create(req.body);
-  res.json(book);
-}
-const getSearch = function (req, res) {
-  var noMatch = null;
-  if (req.query.search) {
-    const regex = new RegExp(escapeRegex(req.query.search), 'gi');
-    // Get all books from DB
-    Book.find({
-      title: regex
-    }, function (err, allBooks) {
-      if (err) {
-        console.log(err);
-      } else {
-        if (allBooks.length < 1) {
-          noMatch = "No Books match that query, please try again.";
-        }
-        // res.render("books/index", {
-        //   books: allBooks,
-        //   noMatch: noMatch
-        // });
-        res.json([allBooks]);
-      }
-    });
-  } else {
-    // Get all books from DB
-    Book.find({}, function (err, allBooks) {
-      if (err) {
-        console.log(err);
-      } else {
-        // res.render("books/index", {
-        //   books: allBooks,
-        //   noMatch: noMatch
-        // });
-        res.json([allBooks]);
-      }
-    });
-  }
-};
 
-function escapeRegex(text) {
-  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-};
 const getCreate = function (req, res) {
   var user = User.find({
     id: req.signedCookies.userId
@@ -80,27 +37,31 @@ const getCreate = function (req, res) {
   });
 };
 const postCreate = async function (req, res) {
-  req.body.id = shortid.generate();
-  const file = req.file.path;
-  console.log(file);
+  console.log(req.file)
+  const file= req.file.path;
+  console.log(req.body)
+  var user = req.body.user;
+  var user2 = JSON.parse(user)
+
   const path = await cloudinary.uploader
     .upload(file)
     .then(result => result.url)
     .catch(error => console.log("erro:::>", error));
-
   Book.create({
-    id: req.body.id,
-    title: req.body.title,
-    description: req.body.description,
-    cover: path,
-    price: req.body.price
+        id:shortid.generate(),
+        creator_id:user2.id,
+        title: req.body.title,
+        description: req.body.description,
+        cover: path,
+        price: req.body.price
   });
   if (req.file) {
     fs.unlinkSync(req.file.path);
   }
-  console.log(typeof (req.body.price));
-  return res.redirect("/book");
+
+return res.json({a:req.body,b:req.file})
 };
+
 const viewDetailBook = function (req, res) {
   User.findOne({
     id: req.signedCookies.userId
@@ -115,45 +76,19 @@ const viewDetailBook = function (req, res) {
     })
   })
 };
-const editBook = async function (req, res) {
-  const file = req.file.path;
-  console.log(file);
-  const path = await cloudinary.uploader
-    .upload(file)
-    .then(result => result.url)
-    .catch(error => console.log("erro:::>", error));
-  Book.findOneAndUpdate({
-      id: req.params.id
-    }, {
-      title: req.body.title,
-      description: req.body.description,
-      cover: path,
-      price: req.body.price
-    },
-    function (err, updatedCampground) {
-      if (err) {
-        res.redirect("/book");
-      } else {
-        res.redirect("/book");
-      }
-      if (req.file) {
-        fs.unlinkSync(req.file.path);
-      }
-    });
+var getApi = async (req, res) => {
+ 
+  let books = await Book.find();
+  res.json(
+    books
+    )
 };
-var deleteBook = async function (req, res) {
-  await Book.findOneAndRemove({
-    id: req.params.id
-  })
-  res.redirect('/book');
-};
+
+
 module.exports = {
   getBook,
-  create,
-  getSearch,
   getCreate,
-  postCreate,
   viewDetailBook,
-  deleteBook,
-  editBook
+  getApi,
+  postCreate
 }
